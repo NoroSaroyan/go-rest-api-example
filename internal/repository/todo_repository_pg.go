@@ -11,8 +11,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 
-	"go-rest-api-example/internal/domain"
-	"go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/domain"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
 )
 
 type TodoRepositoryPg struct {

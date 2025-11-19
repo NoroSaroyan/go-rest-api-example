@@ -8,8 +8,8 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
-	"go-rest-api-example/internal/pkg/logger"
-	"go-rest-api-example/internal/service"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/service"
 )
 
 // TodoHandler provides HTTP endpoints for managing todos.

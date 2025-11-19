@@ -7,8 +7,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"go-rest-api-example/internal/domain"
-	"go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/domain"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
 )
 
 // TodoRepository is the contract the persistence layer must satisfy.

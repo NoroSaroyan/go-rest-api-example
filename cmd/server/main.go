@@ -29,9 +29,9 @@ import (
 
 	"go.uber.org/zap"
 
-	_ "go-rest-api-example/docs" // Import generated docs
-	"go-rest-api-example/internal/app"
-	"go-rest-api-example/internal/pkg/logger"
+	_ "github.com/NoroSaroyan/go-rest-api-example/docs" // Import generated docs
+	"github.com/NoroSaroyan/go-rest-api-example/internal/app"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
 )
 
 const (

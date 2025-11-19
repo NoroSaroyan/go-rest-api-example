@@ -46,7 +46,7 @@ linters-settings:
     sections:
       - standard
       - default
-      - prefix(go-rest-api-example)
+      - prefix(github.com/NoroSaroyan/go-rest-api-example)
   
   depguard:
     rules:

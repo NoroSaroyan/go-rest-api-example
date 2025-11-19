@@ -7,10 +7,10 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 
-	"go-rest-api-example/internal/pkg/logger"
-	"go-rest-api-example/internal/service"
-	v1 "go-rest-api-example/internal/transport/http/v1"
-	"go-rest-api-example/internal/transport/middleware"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/service"
+	v1 "github.com/NoroSaroyan/go-rest-api-example/internal/transport/http/v1"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/transport/middleware"
 )
 
 // NewRouter configures all HTTP routes and middleware.

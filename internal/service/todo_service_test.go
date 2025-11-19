@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"go-rest-api-example/internal/domain"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/domain"
 )
 
 // MockTodoRepository implements TodoRepository for testing

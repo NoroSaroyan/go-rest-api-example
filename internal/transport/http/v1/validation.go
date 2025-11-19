@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 
-	"go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
 )
 
 // validator instance for the v1 package

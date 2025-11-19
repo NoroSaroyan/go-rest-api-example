@@ -64,6 +64,7 @@ jobs:
         file: ./coverage.out
         flags: unittests
         name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Run vet
       run: go vet ./...

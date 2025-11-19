@@ -9,10 +9,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 
-	"go-rest-api-example/internal/config"
-	"go-rest-api-example/internal/pkg/logger"
-	"go-rest-api-example/internal/repository"
-	"go-rest-api-example/internal/service"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/config"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/repository"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/service"
 )
 
 // App encapsulates the whole application state.

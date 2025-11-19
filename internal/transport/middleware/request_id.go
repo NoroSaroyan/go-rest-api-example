@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"go-rest-api-example/internal/pkg/id"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/id"
 )
 
 type ctxRequestIDKey struct{}
