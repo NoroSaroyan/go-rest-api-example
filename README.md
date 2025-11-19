@@ -1,6 +1,6 @@
 # Todo API
 
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=for-the-badge&logo=go)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/NoroSaroyan/go-rest-api-example?style=for-the-badge)](https://goreportcard.com/report/github.com/NoroSaroyan/go-rest-api-example)
 [![GitHub Actions](https://img.shields.io/github/actions/workflow/status/NoroSaroyan/go-rest-api-example/ci.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/NoroSaroyan/go-rest-api-example/actions)
