@@ -3,14 +3,16 @@ package app
 import (
 	"context"
 	"fmt"
+	"math"
+	"net/http"
+
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
+
+	"go-rest-api-example/internal/config"
 	"go-rest-api-example/internal/pkg/logger"
 	"go-rest-api-example/internal/repository"
 	"go-rest-api-example/internal/service"
-	"go.uber.org/zap"
-	"net/http"
-
-	"go-rest-api-example/internal/config"
 )
 
 // App encapsulates the whole application state.
@@ -39,8 +41,17 @@ func New() (*App, error) {
 	}
 
 	// Configure connection pool
-	dbconfig.MaxConns = int32(cfg.DB.MaxOpenConns)
-	dbconfig.MinConns = int32(cfg.DB.MaxIdleConns)
+	if cfg.DB.MaxOpenConns > math.MaxInt32 || cfg.DB.MaxOpenConns < 0 {
+		log.Error("max open connections value out of range for int32", zap.Int("value", cfg.DB.MaxOpenConns))
+		return nil, fmt.Errorf("max open connections value %d out of range for int32", cfg.DB.MaxOpenConns)
+	}
+	if cfg.DB.MaxIdleConns > math.MaxInt32 || cfg.DB.MaxIdleConns < 0 {
+		log.Error("max idle connections value out of range for int32", zap.Int("value", cfg.DB.MaxIdleConns))
+		return nil, fmt.Errorf("max idle connections value %d out of range for int32", cfg.DB.MaxIdleConns)
+	}
+
+	dbconfig.MaxConns = int32(cfg.DB.MaxOpenConns) //#nosec G115 -- bounds checked above
+	dbconfig.MinConns = int32(cfg.DB.MaxIdleConns) //#nosec G115 -- bounds checked above
 	dbconfig.MaxConnLifetime = cfg.DB.ConnMaxLifetime
 	dbconfig.MaxConnIdleTime = cfg.DB.ConnMaxIdleTime
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"go.uber.org/zap"
 
 	"go-rest-api-example/internal/pkg/logger"
 	"go-rest-api-example/internal/service"
@@ -29,7 +30,9 @@ func NewRouter(todoService service.TodoService, log logger.Logger) http.Handler 
 	// Simple healthcheck
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			log.Error("failed to write health check response", zap.Error(err))
+		}
 	}).Methods("GET")
 
 	// Swagger documentation

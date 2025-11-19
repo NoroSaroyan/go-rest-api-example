@@ -4,18 +4,15 @@ run:
   tests: true
 
 output:
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
 
 linters:
   enable:
     - bodyclose
-    - deadcode
-    - depguard
-    - dogsled
     - errcheck
-    - exportloopref
     - exhaustive
     - gci
     - gocognit
@@ -24,8 +21,7 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - golint
-    - gomnd
+    - mnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -38,13 +34,11 @@ linters:
     - nolintlint
     - rowserrcheck
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
 
 linters-settings:
@@ -54,8 +48,12 @@ linters-settings:
       - default
       - prefix(go-rest-api-example)
   
-  golint:
-    min-confidence: 0.8
+  depguard:
+    rules:
+      main:
+        deny:
+          - pkg: io/ioutil
+            desc: "io/ioutil is deprecated, use io and os packages instead"
   
   gocyclo:
     min-complexity: 15
@@ -70,7 +68,7 @@ issues:
   exclude-rules:
     - path: _test\.go
       linters:
-        - gomnd
+        - mnd
         - lll
     - path: docs/
       linters:

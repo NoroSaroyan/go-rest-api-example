@@ -75,7 +75,11 @@ func WriteJSONSafe(w http.ResponseWriter, r *http.Request, code int, v interface
 
 		// If JSON encoding fails, write a minimal error response
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"internal server error","code":"ENCODING_ERROR"}`))
+		if _, writeErr := w.Write([]byte(`{"error":"internal server error","code":"ENCODING_ERROR"}`)); writeErr != nil {
+			if log != nil {
+				log.Error("failed to write error response", zap.Error(writeErr))
+			}
+		}
 	}
 }
 

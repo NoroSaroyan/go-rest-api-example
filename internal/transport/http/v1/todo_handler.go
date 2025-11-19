@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"go-rest-api-example/internal/service"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"go-rest-api-example/internal/pkg/logger"
+	"go-rest-api-example/internal/service"
 )
 
 // TodoHandler provides HTTP endpoints for managing todos.
@@ -49,7 +49,7 @@ func (h *TodoHandler) create(w http.ResponseWriter, r *http.Request) {
 			WriteValidationError(w, r, validationErr)
 			return
 		}
-		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid request body"})
+		WriteError(w, r, NewValidationError("invalid request body"))
 		return
 	}
 
@@ -81,9 +81,9 @@ func (h *TodoHandler) getByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		if log != nil {
-			log.Warn("invalid ID parameter")
+			log.Warn("invalid ID parameter", zap.String("param", idStr))
 		}
-		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid id parameter"})
+		WriteError(w, r, NewValidationError("invalid id parameter"))
 		return
 	}
 
@@ -152,7 +152,7 @@ func (h *TodoHandler) delete(w http.ResponseWriter, r *http.Request) {
 		if log != nil {
 			log.Warn("invalid id", zap.String("param", idStr))
 		}
-		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "invalid id parameter"})
+		WriteError(w, r, NewValidationError("invalid id parameter"))
 		return
 	}
 

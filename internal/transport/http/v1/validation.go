@@ -59,7 +59,11 @@ func WriteValidationError(w http.ResponseWriter, r *http.Request, err *Validatio
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
-	json.NewEncoder(w).Encode(err)
+	if encodeErr := json.NewEncoder(w).Encode(err); encodeErr != nil {
+		if log != nil {
+			log.Error("failed to encode validation error response", zap.Error(encodeErr))
+		}
+	}
 }
 
 func getValidationMessage(field, tag, param string) string {

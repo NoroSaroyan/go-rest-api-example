@@ -16,10 +16,15 @@ import (
 	"encoding/hex"
 )
 
+const (
+	// idByteLength defines how many bytes to generate for the ID
+	idByteLength = 8 // 8 bytes = 16 hex chars
+)
+
 // New generates a random 16-character request ID.
 // It uses crypto/rand for secure random bytes.
 func New() string {
-	b := make([]byte, 8) // 8 bytes = 16 hex chars
+	b := make([]byte, idByteLength)
 	_, _ = rand.Read(b)
 	return hex.EncodeToString(b)
 }

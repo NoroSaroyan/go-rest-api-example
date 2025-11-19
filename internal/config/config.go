@@ -56,9 +56,7 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("failed to load database config: %w", err)
 	}
 
-	if err := cfg.loadLogConfig(); err != nil {
-		return nil, fmt.Errorf("failed to load log config: %w", err)
-	}
+	cfg.loadLogConfig()
 
 	if err := cfg.validate(); err != nil {
 		return nil, fmt.Errorf("config validation failed: %w", err)
@@ -118,9 +116,8 @@ func (c *Config) loadDBConfig() error {
 	return nil
 }
 
-func (c *Config) loadLogConfig() error {
+func (c *Config) loadLogConfig() {
 	c.Log.Level = getEnv("LOG_LEVEL", "info")
-	return nil
 }
 
 func (c *Config) validate() error {

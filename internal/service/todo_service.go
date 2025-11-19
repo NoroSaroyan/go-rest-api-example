@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
+
+	"go.uber.org/zap"
+
 	"go-rest-api-example/internal/domain"
 	"go-rest-api-example/internal/pkg/logger"
-	"go.uber.org/zap"
-	"strings"
 )
 
 // TodoRepository is the contract the persistence layer must satisfy.

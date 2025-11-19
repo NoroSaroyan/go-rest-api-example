@@ -12,6 +12,11 @@ import (
 	"go-rest-api-example/internal/pkg/logger"
 )
 
+const (
+	// jsonTagParts defines how many parts we expect when splitting JSON tags
+	jsonTagParts = 2
+)
+
 // Validator wraps the go-playground/validator for dependency injection
 type Validator interface {
 	Validate(s interface{}) error
@@ -27,7 +32,7 @@ func NewValidator() Validator {
 
 	// Register custom tag name function to use JSON tag names in error messages
 	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		name := strings.SplitN(fld.Tag.Get("json"), ",", jsonTagParts)[0]
 		if name == "-" {
 			return ""
 		}
@@ -102,7 +107,11 @@ func writeValidationError(w http.ResponseWriter, message string, details map[str
 		Details: details,
 	}
 
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// If we can't encode the validation error response, there's not much we can do
+		// except log the error - the status code has already been set
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
 }
 
 func getValidationMessage(field, tag, param string) string {

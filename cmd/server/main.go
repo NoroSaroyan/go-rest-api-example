@@ -22,15 +22,21 @@ package main
 
 import (
 	"context"
-	"go-rest-api-example/internal/app"
-	"go-rest-api-example/internal/pkg/logger"
-	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"go.uber.org/zap"
+
 	_ "go-rest-api-example/docs" // Import generated docs
+	"go-rest-api-example/internal/app"
+	"go-rest-api-example/internal/pkg/logger"
+)
+
+const (
+	// shutdownTimeout defines how long to wait for graceful shutdown
+	shutdownTimeout = 5 * time.Second
 )
 
 func main() {
@@ -58,7 +64,7 @@ func main() {
 	log.Info("shutdown signal received")
 
 	// Graceful shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	if err := application.Shutdown(ctx); err != nil {
