@@ -1,0 +1,171 @@
+basePath: /api/v1
+definitions:
+  v1.CreateTodoRequest:
+    properties:
+      title:
+        example: Buy groceries
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - title
+    type: object
+  v1.ErrorResponse:
+    properties:
+      code:
+        type: string
+      error:
+        type: string
+      trace_id:
+        type: string
+    type: object
+  v1.TodoResponse:
+    properties:
+      completed:
+        example: false
+        type: boolean
+      created_at:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Buy groceries
+        type: string
+    type: object
+  v1.ValidationError:
+    properties:
+      details:
+        additionalProperties:
+          type: string
+        type: object
+      error:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: A REST API for managing todo items with clean architecture
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Todo API
+  version: "1.0"
+paths:
+  /todos:
+    get:
+      description: Retrieves a list of all todo items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved todos
+          schema:
+            items:
+              $ref: '#/definitions/v1.TodoResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: List all todo items
+      tags:
+      - todos
+    post:
+      consumes:
+      - application/json
+      description: Creates a new todo item with the provided title
+      parameters:
+      - description: Todo creation request
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created todo
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/v1.ValidationError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Create a new todo item
+      tags:
+      - todos
+  /todos/{id}:
+    delete:
+      description: Deletes a specific todo item by its ID
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Successfully deleted todo
+        "400":
+          description: Invalid ID parameter
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Todo not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Delete a todo item
+      tags:
+      - todos
+    get:
+      description: Retrieves a specific todo item by its ID
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved todo
+          schema:
+            $ref: '#/definitions/v1.TodoResponse'
+        "400":
+          description: Invalid ID parameter
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Todo not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Get a todo item by ID
+      tags:
+      - todos
+produces:
+- application/json
+schemes:
+- http
+- https
+swagger: "2.0"
