@@ -11,6 +11,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+type Options struct {
+	Level string `long:"level" env:"LEVEL" default:"info" description:"Log verbosity level"`
+}
+
 // Logger wraps zap.Logger to provide a clean interface for dependency injection
 type Logger interface {
 	Debug(msg string, fields ...zap.Field)
@@ -74,14 +78,10 @@ func New(level string) Logger {
 	return &zapLogger{zap: zl}
 }
 
-// NewFromEnv creates a new logger instance configured from environment variables.
+// NewLogger creates a new logger instance configured from environment variables.
 // This is a convenience function for backward compatibility.
-func NewFromEnv() Logger {
-	level := strings.ToLower(os.Getenv("LOG_LEVEL"))
-	if level == "" {
-		level = "info"
-	}
-	return New(level)
+func NewLogger(opts Options) Logger {
+	return New(opts.Level)
 }
 
 func parseLevel(level string) zapcore.Level {

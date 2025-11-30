@@ -43,15 +43,30 @@ const (
 	shutdownTimeout = 5 * time.Second
 )
 
-func main() {
-	ctx := context.Background()
-	ctx = logger.Inject(ctx, logger.NewFromEnv())
+type options struct {
+	Log logger.Options `group:"log" namespace:"log" env-namespace:"LOG" description:"Log level"`
+}
 
-	exitCode := runMain(ctx)
+func main() {
+	opts := options{}
+	parser := flags.NewParser(&opts, flags.Default)
+
+	if _, err := parser.Parse(); err != nil {
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			fmt.Printf("help called: %v\n", err)
+			return
+		}
+		log.Fatal("couldn't parse flags", err)
+	}
+
+	ctx := context.Background()
+	ctx = logger.Inject(ctx, logger.NewLogger(opts.Log))
+
+	exitCode := runMain(ctx, opts)
 	os.Exit(exitCode)
 }
 
-func runMain(ctx context.Context) int {
+func runMain(ctx context.Context, opts options) int {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
