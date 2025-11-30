@@ -22,9 +22,9 @@ package main
 
 import (
 	"context"
+	"errors"
+	"golang.org/x/sync/errgroup"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"go.uber.org/zap"
@@ -32,6 +32,7 @@ import (
 	_ "github.com/NoroSaroyan/go-rest-api-example/docs" // Import generated docs
 	"github.com/NoroSaroyan/go-rest-api-example/internal/app"
 	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/shutdown"
 )
 
 const (
@@ -40,34 +41,40 @@ const (
 )
 
 func main() {
-	log := logger.NewFromEnv()
+	ctx := context.Background()
+	ctx = logger.Inject(ctx, logger.NewFromEnv())
 
-	application, err := app.New()
-	if err != nil {
-		log.Fatal("failed to create application", zap.Error(err))
-	}
+	exitCode := runMain(ctx)
+	os.Exit(exitCode)
+}
 
-	// graceful shutdown support
-	go func() {
-		if err := application.Run(); err != nil {
-			log.Fatal("HTTP server error", zap.Error(err))
-		}
-	}()
-
-	log.Info("application started")
-
-	// Wait for interrupt
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	<-stop
-
-	log.Info("shutdown signal received")
-
-	// Graceful shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+func runMain(ctx context.Context) int {
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	if err := application.Shutdown(ctx); err != nil {
-		log.Error("failed to gracefully shutdown", zap.Error(err))
+	log := logger.FromContext(ctx)
+	g, ctx := errgroup.WithContext(ctx)
+
+	application, err := app.New(ctx)
+	if err != nil {
+		log.Error("failed to create application", zap.Error(err))
+		return 1
 	}
+
+	g.Go(func() error { return application.Run(ctx) })
+
+	g.Go(func() error { return shutdown.Receive(ctx) })
+
+	errg := g.Wait()
+
+	if errors.Is(errg, shutdown.ErrGracefullyShutdown) {
+		log.Info("Server is gracefully shut down")
+		return 0
+	}
+	if errg != nil {
+		log.Error("Unexpected error:", zap.Error(errg))
+		return 9
+	}
+
+	return 0
 }

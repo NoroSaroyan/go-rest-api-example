@@ -3,11 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
-	"math"
-	"net/http"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
+	"math"
+	"net/http"
 
 	"github.com/NoroSaroyan/go-rest-api-example/internal/config"
 	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
@@ -23,14 +22,14 @@ type App struct {
 	logger logger.Logger
 }
 
-func New() (*App, error) {
+func New(ctx context.Context) (*App, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
 	// Initialize logger
-	log := logger.New(cfg.Log.Level)
+	log := logger.FromContext(ctx)
 	log.Info("starting application")
 
 	// Create DB connection with pool configuration
@@ -94,14 +93,20 @@ func New() (*App, error) {
 }
 
 // Run starts the HTTP server.
-func (a *App) Run() error {
+func (a *App) Run(ctx context.Context) error {
 	a.logger.Info("HTTP server listening", zap.String("port", a.cfg.App.Port))
+
+	go func() {
+		a.Shutdown(ctx)
+	}()
+
 	return a.server.ListenAndServe()
 }
 
 // Shutdown gracefully stops the server.
 func (a *App) Shutdown(ctx context.Context) error {
-	a.logger.Info("shutting down server")
+	<-ctx.Done()
+	a.logger.Info("Shutting down server")
 	a.db.Close()
 	return a.server.Shutdown(ctx)
 }
