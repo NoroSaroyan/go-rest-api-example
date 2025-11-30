@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// github.com/jessevdk/go-flags
 type Config struct {
 	App AppConfig
 	DB  DBConfig
