@@ -18,7 +18,7 @@ func TestLoad(t *testing.T) {
 			name: "default values",
 			env:  map[string]string{},
 			validate: func(c *Config) bool {
-				return c.App.Port == "8080" &&
+				return c.App.Port == "5949" &&
 					c.DB.Host == "localhost" &&
 					c.DB.Port == 5432 &&
 					c.Log.Level == "info"

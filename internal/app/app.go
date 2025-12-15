@@ -3,15 +3,15 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
-	"math"
 	"net/http"
 
 	"github.com/NoroSaroyan/go-rest-api-example/internal/config"
 	"github.com/NoroSaroyan/go-rest-api-example/internal/pkg/logger"
+	"github.com/NoroSaroyan/go-rest-api-example/internal/postgres"
 	"github.com/NoroSaroyan/go-rest-api-example/internal/repository"
 	"github.com/NoroSaroyan/go-rest-api-example/internal/service"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
 // App encapsulates the whole application state.
@@ -32,39 +32,29 @@ func New(ctx context.Context) (*App, error) {
 	log := logger.FromContext(ctx)
 	log.Info("starting application")
 
-	// Create DB connection with pool configuration
-	dbconfig, err := pgxpool.ParseConfig(cfg.DatabaseURL())
+	// Build DB config using functional options
+	dbCfg, err := postgres.NewConfig(
+		postgres.WithHost(cfg.DB.Host),
+		postgres.WithPort(uint16(cfg.DB.Port)),
+		postgres.WithUser(cfg.DB.User),
+		postgres.WithPassword(cfg.DB.Password),
+		postgres.WithDatabase(cfg.DB.Name),
+		postgres.WithMaxOpenConnections(cfg.DB.MaxOpenConns),
+		postgres.WithMaxIdleConnections(cfg.DB.MaxIdleConns),
+		postgres.WithConnMaxLifetime(cfg.DB.ConnMaxLifetime),
+		postgres.WithConnMaxIdleTime(cfg.DB.ConnMaxIdleTime),
+		postgres.WithParams(make(map[string]string)),
+	)
 	if err != nil {
-		log.Error("failed to parse database config", zap.Error(err))
-		return nil, fmt.Errorf("failed to parse database config: %w", err)
+		log.Error("failed to build db config", zap.Error(err))
+		return nil, fmt.Errorf("failed to build db config: %w", err)
 	}
 
-	// Configure connection pool
-	if cfg.DB.MaxOpenConns > math.MaxInt32 || cfg.DB.MaxOpenConns < 0 {
-		log.Error("max open connections value out of range for int32", zap.Int("value", cfg.DB.MaxOpenConns))
-		return nil, fmt.Errorf("max open connections value %d out of range for int32", cfg.DB.MaxOpenConns)
-	}
-	if cfg.DB.MaxIdleConns > math.MaxInt32 || cfg.DB.MaxIdleConns < 0 {
-		log.Error("max idle connections value out of range for int32", zap.Int("value", cfg.DB.MaxIdleConns))
-		return nil, fmt.Errorf("max idle connections value %d out of range for int32", cfg.DB.MaxIdleConns)
-	}
-
-	dbconfig.MaxConns = int32(cfg.DB.MaxOpenConns) //#nosec G115 -- bounds checked above
-	dbconfig.MinConns = int32(cfg.DB.MaxIdleConns) //#nosec G115 -- bounds checked above
-	dbconfig.MaxConnLifetime = cfg.DB.ConnMaxLifetime
-	dbconfig.MaxConnIdleTime = cfg.DB.ConnMaxIdleTime
-
-	dbpool, err := pgxpool.NewWithConfig(context.Background(), dbconfig)
+	// Open DB pool (postgres package owns pgxpool configuration + ping)
+	dbpool, err := postgres.Open(ctx, dbCfg)
 	if err != nil {
 		log.Error("failed to connect to DB", zap.Error(err))
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
-	}
-
-	// Test database connection
-	if err := dbpool.Ping(context.Background()); err != nil {
-		log.Error("failed to ping database", zap.Error(err))
-		dbpool.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, fmt.Errorf("failed to connect to DB: %w", err)
 	}
 
 	log.Info("database connection established")
@@ -97,16 +87,27 @@ func (a *App) Run(ctx context.Context) error {
 	a.logger.Info("HTTP server listening", zap.String("port", a.cfg.App.Port))
 
 	go func() {
-		a.Shutdown(ctx)
+		_ = a.Shutdown(ctx)
 	}()
 
-	return a.server.ListenAndServe()
+	// ListenAndServe returns http.ErrServerClosed on graceful shutdown; treat that as non-error.
+	err := a.server.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		return err
+	}
+	return nil
 }
 
 // Shutdown gracefully stops the server.
 func (a *App) Shutdown(ctx context.Context) error {
 	<-ctx.Done()
 	a.logger.Info("Shutting down server")
+
+	// Stop accepting new requests / allow in-flight requests to finish.
+	err := a.server.Shutdown(context.Background())
+
+	// Close DB pool after server shutdown begins.
 	a.db.Close()
-	return a.server.Shutdown(ctx)
+
+	return err
 }
